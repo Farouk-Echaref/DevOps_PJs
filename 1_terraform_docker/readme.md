@@ -89,6 +89,8 @@ resource "docker_container" "nginx" {
   - Maps **port 8000** on the host to **port 80** inside the container.
 
 - **Key Components**:
+  - **`provider "docker" {}`**: This block tells Terraform to use   the Docker provider.
+    By default, Terraform will look for Docker's API on `unix:///var/run/docker.sock` (the Docker daemon socket on Linux/macOS) or a configured Docker host. If Docker is running on a remote host, you can customize this with provider settings.
   - **`docker_image`**: Ensures the `nginx:latest` image is pulled from Docker Hub.
     - `keep_locally = false`: Removes the image if no containers are using it.
   - **`docker_container`**:
