@@ -1,12 +1,15 @@
-# Terraform with Docker: Setting Up and Running an NGINX Container
 
-This project demonstrates how to use **Terraform** with the **Docker provider** to automate creating a Docker container that runs the **NGINX web server**.
+# Terraform with Docker: Automating NGINX Container Deployment
+
+This guide demonstrates how to use **Terraform** with the **Docker provider** to automate the creation and management of a Docker container running the **NGINX web server**. Additionally, it explains how Terraform processes multiple `.tf` files for better configuration management.
+
+* reference: - Terraform as IaC: https://developer.hashicorp.com/terraform/tutorials/docker-get-started/infrastructure-as-code
 
 ---
 
 ## **Prerequisites**
 
-Before running this project, ensure the following tools are installed on your host system:
+Ensure the following tools are installed on your system:
 
 1. **Terraform** (version `~> 1.7`)
    - Install from [Terraform official downloads](https://developer.hashicorp.com/terraform/downloads).
@@ -16,8 +19,8 @@ Before running this project, ensure the following tools are installed on your ho
    terraform --version
    ```
 
-2. **Docker** (already installed and running on your host)
-   - Install Docker by following the [Docker installation guide](https://docs.docker.com/get-docker/).
+2. **Docker**
+   - Follow the [Docker installation guide](https://docs.docker.com/get-docker/) for your OS.
 
    Verify installation:
    ```bash
@@ -29,10 +32,29 @@ Before running this project, ensure the following tools are installed on your ho
 
 ## **Project Structure**
 
-The project contains the following files:
+This project is organized into two main files:
 
-1. **`terraform.tf`**: Configures Terraform requirements, including the provider and version.
-2. **`main.tf`**: Defines the resources Terraform will manage (Docker image and container).
+1. **`terraform.tf`**: Specifies Terraform version and provider requirements.
+2. **`main.tf`**: Defines the resources to manage with Terraform (Docker image and container).
+
+---
+
+## **Understanding Terraform File Processing**
+
+Terraform automatically loads all `.tf` files in the current directory when you execute commands like `terraform init`, `terraform plan`, or `terraform apply`. Here’s how it works:
+
+1. **File Loading**:
+   - Terraform reads all `.tf` files in the directory **in no specific order**.
+   - Filenames (e.g., `main.tf`, `variables.tf`) are purely for organizational purposes.
+
+2. **Merging Configurations**:
+   - Terraform combines all resources, providers, variables, and other blocks from the `.tf` files into a single configuration in memory.
+
+3. **Best Practices**:
+   - Use separate `.tf` files for better readability:
+     - `terraform.tf` for provider and version configurations.
+     - `main.tf` for resource definitions.
+   - Keep all files in the same directory.
 
 ---
 
@@ -53,13 +75,8 @@ terraform {
 ```
 
 - **Purpose**:
-  - Configures Terraform to use the **Docker provider** (`kreuzwerker/docker`).
+  - Configures Terraform to use the **Docker provider**.
   - Ensures compatibility with Terraform version `1.7.x`.
-
-- **Key Details**:
-  - `source`: Specifies the Docker provider location on the Terraform Registry.
-  - `version`: Locks the provider to version `3.0.2` or compatible updates (`< 4.0.0`).
-  - `required_version`: Ensures Terraform itself is version `1.7.x`.
 
 ---
 
@@ -85,67 +102,35 @@ resource "docker_container" "nginx" {
 
 - **Purpose**:
   - Pulls the latest `nginx` Docker image.
-  - Creates a Docker container named `tutorial` using that image.
-  - Maps **port 8000** on the host to **port 80** inside the container.
-
-- **Key Components**:
-  - **`provider "docker" {}`**: This block tells Terraform to use   the Docker provider.
-    By default, Terraform will look for Docker's API on `unix:///var/run/docker.sock` (the Docker daemon socket on Linux/macOS) or a configured Docker host. If Docker is running on a remote host, you can customize this with provider settings.
-  - **`docker_image`**: Ensures the `nginx:latest` image is pulled from Docker Hub.
-    - `keep_locally = false`: Removes the image if no containers are using it.
-  - **`docker_container`**:
-    - Starts a container based on the image.
-    - Exposes NGINX on host port `8000` so it’s accessible via `http://localhost:8000`.
+  - Creates a container named `tutorial`.
+  - Maps host port `8000` to container port `80`.
 
 ---
 
 ## **How to Run the Project**
 
 ### Step 1: Initialize Terraform
-Run the following command to initialize the project. This downloads the Docker provider plugin locally.
+Run the following command to initialize the project and download the Docker provider plugin:
 
 ```bash
 terraform init
 ```
 
-You should see output indicating the provider is being installed:
-```
-- Installing kreuzwerker/docker v3.0.2...
-```
-
----
-
 ### Step 2: Plan the Changes
-Preview the changes Terraform will make (what resources it will create).
+Preview the resources Terraform will create:
 
 ```bash
 terraform plan
 ```
 
-Example output:
-```
-Plan: 2 to add, 0 to change, 0 to destroy.
-```
-
----
-
 ### Step 3: Apply the Changes
-Run Terraform to create the Docker resources (image and container).
+Apply the configuration to create the Docker resources:
 
 ```bash
 terraform apply
 ```
 
-When prompted, confirm with `yes`.
-
-**Example Output**:
-```
-docker_image.nginx: Creating...
-docker_container.nginx: Creating...
-Apply complete! Resources: 2 added.
-```
-
----
+Confirm with `yes`.
 
 ### Step 4: Verify the Container
 Check if the container is running:
@@ -154,13 +139,7 @@ Check if the container is running:
 docker ps
 ```
 
-You should see something like this:
-```
-CONTAINER ID   IMAGE          COMMAND                  PORTS                  NAMES
-1234567890ab   nginx:latest   "nginx -g 'daemon of…"   0.0.0.0:8000->80/tcp   tutorial
-```
-
-Access the NGINX web server by visiting:
+Access the NGINX web server:
 
 ```
 http://localhost:8000
@@ -176,21 +155,7 @@ To remove the Docker container and image created by Terraform, run:
 terraform destroy
 ```
 
-Confirm with `yes`. Terraform will clean up all resources it managed.
-
----
-
-## **What Happens Behind the Scenes?**
-
-1. **`terraform init`**:
-   - Downloads the required Docker provider (`kreuzwerker/docker` version 3.0.2).
-2. **`terraform apply`**:
-   - Pulls the `nginx:latest` image from Docker Hub.
-   - Creates a container named `tutorial`.
-   - Maps port `8000` on the host to port `80` in the container.
-3. **Docker Integration**:
-   - Terraform communicates with Docker via the **Docker API**.
-   - Terraform **does not install Docker**; it assumes Docker is already installed.
+Confirm with `yes`.
 
 ---
 
@@ -220,12 +185,26 @@ Confirm with `yes`. Terraform will clean up all resources it managed.
 
 ---
 
+## **What Happens Behind the Scenes?**
+
+1. **`terraform init`**:
+   - Downloads the required Docker provider.
+2. **`terraform apply`**:
+   - Pulls the `nginx:latest` image from Docker Hub.
+   - Creates a container named `tutorial`.
+   - Maps port `8000` on the host to port `80` in the container.
+3. **Terraform & Docker**:
+   - Terraform communicates with Docker via the Docker API.
+   - It assumes Docker is installed and running.
+
+---
+
 ## **Summary**
 
-This project automates the following:
-1. Pulling the latest NGINX Docker image.
-2. Creating a Docker container named `tutorial`.
-3. Mapping host port `8000` to container port `80`.
+This project demonstrates how Terraform simplifies the lifecycle management of Docker containers:
 
-You can manage the container lifecycle (create, update, destroy) easily using Terraform commands.
+1. Automatically pulling the NGINX Docker image.
+2. Creating and configuring the container.
+3. Managing resources using a declarative approach.
 
+Let me know if you'd like to enhance or extend this setup! 🚀
