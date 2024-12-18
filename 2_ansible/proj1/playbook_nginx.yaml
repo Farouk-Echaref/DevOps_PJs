@@ -1,0 +1,16 @@
+- name : Deploy a Docker container
+  hosts: localhost
+  tasks:
+    - name: pull the latest nginx image
+      community.docker.docker_image:
+        name: nginx
+        tag: latest
+        source: pull
+
+    - name: Run an nginx container
+      community.docker.docker_container:
+        name: nginx-container
+        image: nginx:latest
+        state: started
+        ports:
+          - "8080:80"

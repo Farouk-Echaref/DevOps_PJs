@@ -1,0 +1,7 @@
+- name: Install a package in the container
+  hosts: docker 
+  tasks:
+    - name: install curl
+    ansible.builtin.package:
+      name: curl
+      state: present
