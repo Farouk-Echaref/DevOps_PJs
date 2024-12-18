@@ -1,4 +1,4 @@
-### **Ansible Overview**
+# **Ansible Overview**
 - **Purpose**: Automates tasks with playbooks that declare the desired system state. Ansible ensures the system (local or remote) remains in that state.
 - **Features**: 
   - **Agent-less architecture**: No need to install agents on remote systems.
@@ -7,7 +7,7 @@
 
 ---
 
-### **Building an Inventory**
+## **Building an Inventory**
 - An inventory defines the systems managed by Ansible.
 - Example `inventory.ini` file:
   ```ini
@@ -154,4 +154,5 @@ Deploy an Nginx container:
 | **Ease of Setup**            | High                     | Medium                   | High                      |
 | **Scope**                    | Docker API only          | Any SSH-capable system   | Local management only     |
 
-For most container setups, the `docker` connection is the easiest and most efficient.
+## **Creating a playbook:**
+
